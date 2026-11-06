@@ -1,0 +1,84 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local Camera = Workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+local AimbotOn, WallbangOn, ESPOn = false, false, false
+local FOVSize = 120
+local selectedTarget = nil
+
+-- FOV Circle (Se centra en celular, sigue al ratón en PC)
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness = 1.5
+FOVCircle.NumSides = 60
+FOVCircle.Filled = false
+FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+
+RunService.RenderStepped:Connect(function()
+    if isMobile then
+        FOVCircle.Position = Camera.ViewportSize / 2
+    else
+        FOVCircle.Position = UserInputService:GetMouseLocation()
+    end
+    FOVCircle.Radius = FOVSize
+    FOVCircle.Visible = AimbotOn or WallbangOn
+end)
+
+-- ESP y Detección de Roles (MM2)
+local function getRole(player)
+    local char = player.Character
+    local bp = player:FindFirstChild("Backpack")
+    if not char then return "None" end
+    if char:FindFirstChild("Knife") or (bp and bp:FindFirstChild("Knife")) then return "Murder" end
+    if char:FindFirstChild("Gun") or (bp and bp:FindFirstChild("Gun")) then return "Sheriff" end
+    if char:FindFirstChild("Revolver") or (bp and bp:FindFirstChild("Revolver")) then return "Hero" end
+    return "Innocent"
+end
+
+local ESPObjects = {}
+RunService.RenderStepped:Connect(function()
+    if not ESPOn then 
+        for _, v in pairs(ESPObjects) do v:Remove() end
+        ESPObjects = {}
+        return 
+    end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            if not ESPObjects[p.Name] then
+                ESPObjects[p.Name] = Drawing.new("Text")
+                ESPObjects[p.Name].Size = 16
+                ESPObjects[p.Name].Center = true
+                ESPObjects[p.Name].Outline = true
+            end
+            local role = getRole(p)
+            local color = Color3.fromRGB(255, 255, 255)
+            if role == "Murder" then color = Color3.fromRGB(255, 0, 0)
+            elseif role == "Sheriff" then color = Color3.fromRGB(0, 150, 255)
+            elseif role == "Hero" then color = Color3.fromRGB(255, 255, 0)
+            elseif role == "Innocent" then color = Color3.fromRGB(0, 255, 0) end
+            
+            local pos, onScreen = Camera:WorldToViewportPoint(p.Character.HumanoidRootPart.Position)
+            if onScreen then
+                ESPObjects[p.Name].Position = Vector2.new(pos.X, pos.Y)
+                ESPObjects[p.Name].Text = p.Name .. " [" .. role .. "]"
+                ESPObjects[p.Name].Color = color
+                ESPObjects[p.Name].Visible = true
+            else
+                ESPObjects[p.Name].Visible = false
+            end
+        end
+    end
+end)
+
+-- Función Fling (Sacar Volando)
+local function FlingPlayer(targetName)
+    local target = Players:FindFirstChild(targetName)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local bv = Instance.new("BodyVelocity", target.Character.HumanoidRootPart)
+        bv.Velocity = Vector3.new(0, 5000, 0)
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        task.delay(2, function() bv:Destroy() end)
+    end
+end
