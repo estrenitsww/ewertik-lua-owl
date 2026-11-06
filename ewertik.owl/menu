@@ -1,0 +1,102 @@
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local isMobile = UserInputService.TouchEnabled
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "EwerkWindUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+-- Botón Flotante (C)
+local FloatingBtn = Instance.new("TextButton", ScreenGui)
+FloatingBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+FloatingBtn.Position = UDim2.new(0, 20, 0.5, 0)
+FloatingBtn.Size = UDim2.new(0, 50, 0, 50)
+FloatingBtn.Font = Enum.Font.GothamBold
+FloatingBtn.Text = "C"
+FloatingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FloatingBtn.TextSize = 22
+FloatingBtn.Active = true
+FloatingBtn.Draggable = true
+Instance.new("UICorner", FloatingBtn).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", FloatingBtn).Color = Color3.fromRGB(50, 50, 50)
+
+-- Ventana Principal
+local Main = Instance.new("Frame", ScreenGui)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Main.BackgroundTransparency = 0.1
+Main.Position = UDim2.new(0.5, -230, 0.5, -160)
+Main.Size = UDim2.new(0, 460, 0, 320)
+Main.Active = true
+Main.Draggable = true
+Main.Visible = false
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", Main).Color = Color3.fromRGB(60, 60, 60)
+
+-- Barra de Título
+local TopBar = Instance.new("Frame", Main)
+TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TopBar.BackgroundTransparency = 0.2
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BorderSizePixel = 0
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 8)
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "ewertik ewl"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local MinBtn = Instance.new("TextButton", TopBar)
+MinBtn.BackgroundTransparency = 1
+MinBtn.Position = UDim2.new(1, -60, 0, 0)
+MinBtn.Size = UDim2.new(0, 30, 1, 0)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+MinBtn.TextSize = 18
+
+local CloseBtn = Instance.new("TextButton", TopBar)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+CloseBtn.Size = UDim2.new(0, 30, 1, 0)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseBtn.TextSize = 16
+
+-- Contenedores de Pestañas y Páginas
+local Sidebar = Instance.new("Frame", Main)
+Sidebar.BackgroundTransparency = 1
+Sidebar.Position = UDim2.new(0, 0, 0, 45)
+Sidebar.Size = UDim2.new(0, 120, 1, -45)
+Instance.new("UIListLayout", Sidebar).Padding = UDim.new(0, 5)
+
+local Pages = Instance.new("Frame", Main)
+Pages.BackgroundTransparency = 1
+Pages.Position = UDim2.new(0, 130, 0, 45)
+Pages.Size = UDim2.new(1, -140, 1, -55)
+
+-- Animaciones
+local function OpenMenu()
+    Main.Visible = true
+    FloatingBtn.Visible = false
+    Main.Size = UDim2.new(0, 0, 0, 0)
+    TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 460, 0, 320)}):Play()
+end
+
+local function CloseMenu()
+    TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+    task.wait(0.2)
+    Main.Visible = false
+    FloatingBtn.Visible = true
+end
+
+FloatingBtn.MouseButton1Click:Connect(OpenMenu)
+MinBtn.MouseButton1Click:Connect(CloseMenu)
+CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
